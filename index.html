@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Inscribed Angle Theorem</title>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     Google Fonts — Jost (display) + Inter (body)
+══════════════════════════════════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Jost:wght@300;600;700&display=swap" rel="stylesheet" />
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKENS - Dark Theme
+══════════════════════════════════════════════════════════════════ */
+:root {
+  --bg-deep:      #0D1B2A;
+  --bg-panel:     #132033;
+  --bg-input:     #0a1520;
+  --border:       #1e3048;
+  --chalk:        #E8EEF4;
+  --chalk-dim:    #8BA3BC;
+  --cyan:         #00a8e8;   /* x, y, z angle colour */
+  --cyan-soft:    rgba(0,168,232,0.18);
+  --accent:       #5B8DEF;
+  --accent-soft:  rgba(91,141,239,.15);
+  --red:          #E05C5C;
+  --green:        #4CAF50;
+  --radius:       12px;
+  --radius-sm:    7px;
+  --shadow:       0 4px 24px rgba(0,0,0,.55);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--bg-deep);
+  color: var(--chalk);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+/* ── Header ── */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 14px 20px;
+  background: var(--bg-panel);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-title { display: flex; flex-direction: column; }
+.header-title h1 {
+  font-family: 'Jost', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1rem, 2.5vw, 1.35rem);
+  letter-spacing: .01em;
+  line-height: 1.1;
+}
+.header-title .subtitle {
+  font-size: .72rem;
+  color: var(--chalk-dim);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+/* Language selector */
+.lang-wrap { display: flex; align-items: center; gap: 7px; }
+.lang-wrap label {
+  font-size: .72rem;
+  color: var(--chalk-dim);
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+select#langSelect {
+  background: var(--bg-input);
+  color: var(--chalk);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 5px 10px;
+  font-size: .8rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: border-color .2s;
+}
+select#langSelect:focus { border-color: var(--accent); }
+
+/* ── Main Grid ── */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  flex: 1;
+  gap: 0;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .main-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    overflow: auto;
+  }
+}
+
+/* ── Canvas Area ── */
+.canvas-area {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-deep);
+  padding: 12px;
+  overflow: hidden;
+}
+
+canvas#geo {
+  display: block;
+  border-radius: var(--radius);
+  touch-action: none;
+  cursor: grab;
+  max-width: 100%;
+  max-height: 100%;
+}
+canvas#geo:active { cursor: grabbing; }
+
+/* Proof Badge */
+.proof-badge {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(13,27,42,.82);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: .85rem;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.badge-var { color: var(--cyan); font-weight: 600; font-family: 'Jost', sans-serif; }
+.badge-eq { color: var(--chalk-dim); }
+
+/* ── Side Panel ── */
+.side-panel {
+  background: var(--bg-panel);
+  border-left: 1px solid var(--border);
+  padding: 20px 16px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (max-width: 768px) {
+  .side-panel {
+    border-left: none;
+    border-top: 1px solid var(--border);
+    padding: 16px;
+    gap: 14px;
+  }
+}
+
+.panel-section h2 {
+  font-family: 'Jost', sans-serif;
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--chalk-dim);
+  margin-bottom: 10px;
+}
+
+/* Angle Cards */
+.angle-cards { display: grid; gap: 8px; }
+.angle-card {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.angle-card .sym-wrap { display: flex; align-items: center; gap: 10px; }
+.angle-card .sym {
+  font-family: 'Jost', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--cyan);
+  line-height: 1;
+}
+.angle-card .lbl { font-size: .65rem; color: var(--chalk-dim); text-transform: uppercase; letter-spacing: .06em; }
+.angle-card .val { font-family: 'Jost', sans-serif; font-size: 1.1rem; font-weight: 700; }
+
+/* ── Input controls ── */
+.input-row { display: flex; flex-direction: column; gap: 5px; }
+.input-row label {
+  font-size: .75rem;
+  color: var(--chalk-dim);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.input-row label span { color: var(--chalk-dim); }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg-deep);
+  cursor: pointer;
+  transition: transform .15s;
+}
+input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.25); }
+
+input[type="number"] {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--chalk);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: .85rem;
+  font-family: inherit;
+  width: 100%;
+  outline: none;
+  transition: border-color .2s;
+}
+input[type="number"]:focus { border-color: var(--accent); }
+
+/* Buttons */
+.btn-apply {
+  width: 100%;
+  padding: 9px;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-family: 'Jost', sans-serif;
+  font-size: .88rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  cursor: pointer;
+  transition: background .2s, transform .1s;
+}
+.btn-apply:hover  { background: #4a7de0; }
+.btn-apply:active { transform: scale(.97); }
+
+.btn-reset {
+  width: 100%;
+  padding: 8px;
+  background: transparent;
+  color: var(--chalk-dim);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', sans-serif;
+  font-size: .8rem;
+  cursor: pointer;
+  transition: border-color .2s, color .2s;
+}
+.btn-reset:hover { border-color: var(--chalk-dim); color: var(--chalk); }
+
+/* Theorem Box */
+.theorem-box {
+  background: var(--accent-soft);
+  border: 1px solid rgba(91,141,239,.3);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  font-size: .78rem;
+  color: var(--chalk-dim);
+  line-height: 1.6;
+}
+.theorem-box strong { display: block; color: var(--chalk); margin-bottom: 5px; font-size: .8rem; }
+
+/* Instructions */
+.hint { font-size: .72rem; color: var(--chalk-dim); line-height: 1.55; display: flex; flex-direction: column; gap: 4px; }
+.hint span::before { content: '→ '; color: var(--accent); }
+
+/* Footer */
+footer {
+  text-align: center;
+  padding: 8px;
+  font-size: .65rem;
+  color: var(--chalk-dim);
+  border-top: 1px solid var(--border);
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <header>
+    <div class="header-title">
+      <h1 id="hTitle">Inscribed Angle Theorem</h1>
+      <span class="subtitle" id="hSubtitle">Interactive Proof Explorer</span>
+    </div>
+    <div class="lang-wrap">
+      <label for="langSelect" id="hLangLabel">Language</label>
+      <select id="langSelect">
+        <option value="en">English</option>
+        <option value="pl">Polski</option>
+        <option value="de">Deutsch</option>
+        <option value="cs">Čeština</option>
+        <option value="hi">हिन्दी</option>
+        <option value="si">සිංහල</option>
+        <option value="ja">日本語</option>
+      </select>
+    </div>
+  </header>
+
+  <div class="main-grid">
+    <div class="canvas-area">
+      <canvas id="geo"></canvas>
+      <div class="proof-badge">
+        <span class="badge-var">x</span> 
+        <span class="badge-eq">= 2</span><span class="badge-var">y</span> 
+        <span class="badge-eq">= 2</span><span class="badge-var">z</span>
+      </div>
+    </div>
+
+    <aside class="side-panel">
+      <!-- Live Angles -->
+      <div class="panel-section">
+        <h2 id="pAngles">Angles</h2>
+        <div class="angle-cards">
+          <div class="angle-card">
+            <div class="sym-wrap">
+              <div class="sym">x</div>
+              <div class="lbl" id="lblCenterAngle">Center<br>Angle</div>
+            </div>
+            <div class="val" id="valX">—</div>
+          </div>
+          <div class="angle-card">
+            <div class="sym-wrap">
+              <div class="sym">y</div>
+              <div class="lbl" id="lblInscribedAngle1">Inscribed<br>Angle</div>
+            </div>
+            <div class="val" id="valY">—</div>
+          </div>
+          <div class="angle-card">
+            <div class="sym-wrap">
+              <div class="sym">z</div>
+              <div class="lbl" id="lblInscribedAngle2">Inscribed<br>Angle</div>
+            </div>
+            <div class="val" id="valZ">—</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Set Angle Input -->
+      <div class="panel-section">
+        <h2 id="pSetAngle">Set Angle</h2>
+        <div class="input-row">
+          <label for="sliderX">
+            <span>x (Center)</span>
+            <span id="sliderXVal">90°</span>
+          </label>
+          <input type="range" id="sliderX" min="1" max="360" value="90" step="1" />
+        </div>
+        <div class="input-row" style="margin-top:8px">
+          <label for="numX" id="numXLbl">Target x (°)</label>
+          <input type="number" id="numX" min="1" max="360" value="90" step="1" />
+        </div>
+        <button class="btn-apply" id="btnApply" style="margin-top:10px">Apply</button>
+        <button class="btn-reset" id="btnReset" style="margin-top:6px">Reset</button>
+      </div>
+
+      <!-- Theorem Text -->
+      <div class="panel-section">
+        <h2 id="pTheoremH">Theorem</h2>
+        <div class="theorem-box">
+          <strong id="theoremTitle">Inscribed Angle Theorem</strong>
+          <span id="theoremBody">The angle subtended by an arc at the center is double the angle subtended by it at any remaining part of the circle.</span>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="panel-section">
+        <h2 id="pHowH">How to use</h2>
+        <div class="hint">
+          <span id="hint1">Drag A, B, P, or Q along the circle</span>
+          <span id="hint2">Type a target angle for x and press Apply</span>
+          <span id="hint3">Use the slider for quick adjustment</span>
+          <span id="hint4">Notice how x is always double y and z</span>
+        </div>
+      </div>
+    </aside>
+  </div>
+  
+  <footer>
+    <span id="footerText">Inscribed Angle Theorem · Interactive Geometry Explorer</span>
+  </footer>
+</div>
+
+<script>
+'use strict';
+
+/* ──────────────────────────────────────────────────────────────
+   LOCALIZATION DICTIONARY
+────────────────────────────────────────────────────────────────*/
+const LANGS = {
+  en: {
+    hTitle:       'Inscribed Angle Theorem',
+    hSubtitle:    'Interactive Proof Explorer',
+    hLangLabel:   'Language',
+    pAngles:      'Angles',
+    lblCenterAngle: 'Center Angle',
+    lblInscribedAngle1: 'Inscribed Angle',
+    lblInscribedAngle2: 'Inscribed Angle',
+    pSetAngle:    'Set Angle',
+    numXLbl:      'Target x (°)',
+    btnApply:     'Apply',
+    btnReset:     'Reset',
+    pTheoremH:    'Theorem',
+    theoremTitle: 'Inscribed Angle Theorem',
+    theoremBody:  'The angle subtended by an arc at the center is double the angle subtended by it at any remaining part of the circle. Angles subtended by the same arc are equal.',
+    pHowH:        'How to use',
+    hint1:        'Drag A, B, P, or Q along the circle',
+    hint2:        'Type a target angle for x and press Apply',
+    hint3:        'Use the slider for quick adjustment',
+    hint4:        'Notice how x is always double y and z',
+    footerText:   'Inscribed Angle Theorem · Interactive Geometry Explorer'
+  },
+  pl: {
+    hTitle:       'Twierdzenie o kącie środkowym i wpisanym',
+    hSubtitle:    'Interaktywny eksplorator dowodu',
+    hLangLabel:   'Język',
+    pAngles:      'Kąty',
+    lblCenterAngle: 'Kąt środkowy',
+    lblInscribedAngle1: 'Kąt wpisany',
+    lblInscribedAngle2: 'Kąt wpisany',
+    pSetAngle:    'Ustaw kąt',
+    numXLbl:      'Docelowy x (°)',
+    btnApply:     'Zastosuj',
+    btnReset:     'Resetuj',
+    pTheoremH:    'Twierdzenie',
+    theoremTitle: 'Twierdzenie o kącie wpisanym',
+    theoremBody:  'Miara kąta środkowego jest dwa razy większa od miary kąta wpisanego opartego na tym samym łuku.',
+    pHowH:        'Jak używać',
+    hint1:        'Przeciągaj A, B, P lub Q wzdłuż okręgu',
+    hint2:        'Wpisz kąt docelowy dla x i naciśnij Zastosuj',
+    hint3:        'Użyj suwaka do szybkiej regulacji',
+    hint4:        'Zauważ, że x jest zawsze podwojeniem y i z',
+    footerText:   'Twierdzenie o kącie wpisanym · Interaktywny eksplorator geometrii'
+  },
+  de: {
+    hTitle:       'Kreiswinkelsatz',
+    hSubtitle:    'Interaktiver Beweis-Explorer',
+    hLangLabel:   'Sprache',
+    pAngles:      'Winkel',
+    lblCenterAngle: 'Zentriwinkel',
+    lblInscribedAngle1: 'Umfangswinkel',
+    lblInscribedAngle2: 'Umfangswinkel',
+    pSetAngle:    'Winkel einstellen',
+    numXLbl:      'Ziel x (°)',
+    btnApply:     'Anwenden',
+    btnReset:     'Zurücksetzen',
+    pTheoremH:    'Satz',
+    theoremTitle: 'Kreiswinkelsatz (Zentriwinkelsatz)',
+    theoremBody:  'Der Zentriwinkel (Mittelpunktswinkel) eines Kreisbogens ist doppelt so groß wie der Umfangswinkel über demselben Bogen.',
+    pHowH:        'Verwendung',
+    hint1:        'Ziehe A, B, P oder Q entlang des Kreises',
+    hint2:        'Gib einen Zielwinkel für x ein und drücke Anwenden',
+    hint3:        'Schieberegler für schnelle Anpassung',
+    hint4:        'Beachte, wie x immer doppelt so groß wie y und z ist',
+    footerText:   'Kreiswinkelsatz · Interaktiver Geometrie-Explorer'
+  },
+  cs: {
+    hTitle:       'Věta o středovém a obvodovém úhlu',
+    hSubtitle:    'Interaktivní průzkum důkazu',
+    hLangLabel:   'Jazyk',
+    pAngles:      'Úhly',
+    lblCenterAngle: 'Středový úhel',
+    lblInscribedAngle1: 'Obvodový úhel',
+    lblInscribedAngle2: 'Obvodový úhel',
+    pSetAngle:    'Nastavit úhel',
+    numXLbl:      'Cílový x (°)',
+    btnApply:     'Použít',
+    btnReset:     'Resetovat',
+    pTheoremH:    'Věta',
+    theoremTitle: 'Věta o středovém a obvodovém úhlu',
+    theoremBody:  'Velikost středového úhlu je dvojnásobkem velikosti obvodového úhlu příslušného k témuž oblouku.',
+    pHowH:        'Jak používat',
+    hint1:        'Přetáhněte A, B, P nebo Q podél kružnice',
+    hint2:        'Zadejte cílový úhel pro x a stiskněte Použít',
+    hint3:        'Pro rychlé nastavení použijte posuvník',
+    hint4:        'Všimněte si, že x je vždy dvojnásobkem y a z',
+    footerText:   'Věta o úhlech · Interaktivní průzkum geometrie'
+  },
+  si: {
+    hTitle:       'කේන්ද්‍රික කෝණ ප්‍රමේයය',
+    hSubtitle:    'අන්තර්ක්‍රියාකාරී සාක්ෂ්‍ය ගවේෂකය',
+    hLangLabel:   'භාෂාව',
+    pAngles:      'කෝණ',
+    lblCenterAngle: 'කේන්ද්‍රික කෝණය',
+    lblInscribedAngle1: 'පරිධි කෝණය',
+    lblInscribedAngle2: 'පරිධි කෝණය',
+    pSetAngle:    'කෝණය සකසන්න',
+    numXLbl:      'ඉලක්ක x (°)',
+    btnApply:     'යොදන්න',
+    btnReset:     'යළි පිහිටුවන්න',
+    pTheoremH:    'ප්‍රමේයය',
+    theoremTitle: 'කේන්ද්‍රික කෝණ ප්‍රමේයය',
+    theoremBody:  'වෘත්ත චාපයක් මගින් කේන්ද්‍රය මත ආපාතනය කරන කෝණය, එම චාපය මගින් පරිධියේ ඉතිරි කොටස මත ආපාතනය කරන කෝණය මෙන් දෙගුණයකි.',
+    pHowH:        'භාවිත කරන්නේ කෙසේද',
+    hint1:        'A, B, P හෝ Q වෘත්තය දිගේ ඈදගෙන යන්න',
+    hint2:        'x සඳහා කෝණ අගයක් ටයිප් කර යොදන්න ඔබන්න',
+    hint3:        'ඉක්මන් සීරුමාරුව සඳහා slider එක භාවිත කරන්න',
+    hint4:        'x අගය සැමවිටම y සහ z මෙන් දෙගුණයක් වන අයුරු බලන්න',
+    footerText:   'කේන්ද්‍රික කෝණ ප්‍රමේයය · අන්තර්ක්‍රියාකාරී ජ්‍යාමිතිය'
+  },
+  hi: {
+    hTitle:       'केन्द्रीय कोण प्रमेय',
+    hSubtitle:    'इंटरएक्टिव प्रमाण अन्वेषक',
+    hLangLabel:   'भाषा',
+    pAngles:      'कोण',
+    lblCenterAngle: 'केन्द्रीय कोण',
+    lblInscribedAngle1: 'अंकित कोण',
+    lblInscribedAngle2: 'अंकित कोण',
+    pSetAngle:    'कोण सेट करें',
+    numXLbl:      'लक्ष्य x (°)',
+    btnApply:     'लागू करें',
+    btnReset:     'रीसेट',
+    pTheoremH:    'प्रमेय',
+    theoremTitle: 'केन्द्रीय कोण प्रमेय',
+    theoremBody:  'किसी चाप द्वारा वृत्त के केंद्र पर बना कोण, उसी चाप द्वारा वृत्त की शेष परिधि के किसी बिंदु पर बने कोण का दोगुना होता है।',
+    pHowH:        'उपयोग कैसे करें',
+    hint1:        'A, B, P या Q को वृत्त के साथ खींचें',
+    hint2:        'x के लिए लक्ष्य कोण टाइप करें और लागू करें दबाएं',
+    hint3:        'त्वरित समायोजन के लिए स्लाइडर का उपयोग करें',
+    hint4:        'देखें कि x हमेशा y और z का दोगुना होता है',
+    footerText:   'केन्द्रीय कोण प्रमेय · इंटरएक्टिव ज्यामिति अन्वेषक'
+  },
+  ja: {
+    hTitle:       '円周角の定理',
+    hSubtitle:    'インタラクティブ証明エクスプローラー',
+    hLangLabel:   '言語',
+    pAngles:      '角度',
+    lblCenterAngle: '中心角',
+    lblInscribedAngle1: '円周角',
+    lblInscribedAngle2: '円周角',
+    pSetAngle:    '角度を設定',
+    numXLbl:      '目標 x (°)',
+    btnApply:     '適用',
+    btnReset:     'リセット',
+    pTheoremH:    '定理',
+    theoremTitle: '円周角の定理',
+    theoremBody:  '1つの弧に対する中心角の大きさは、その弧に対する円周角の大きさの2倍である。同じ弧に対する円周角は等しい。',
+    pHowH:        '使い方',
+    hint1:        'A、B、P、またはQを円上でドラッグしてください',
+    hint2:        'xの目標角度を入力して「適用」を押してください',
+    hint3:        'スライダーで素早く調整できます',
+    hint4:        'xが常にyとzの2倍であることを観察してください',
+    footerText:   '円周角の定理 · インタラクティブ幾何学エクスプローラー'
+  }
+};
+
+/* ──────────────────────────────────────────────────────────────
+   STATE
+────────────────────────────────────────────────────────────────*/
+const TWO_PI = Math.PI * 2;
+const DEG = Math.PI / 180;
+const RAD = 180 / Math.PI;
+
+let angleQ = 135 * DEG;
+let angleP = 45 * DEG;
+let angleC = 0; // Fixed center
+let angleB = 225 * DEG;
+let angleA = 300 * DEG;
+
+let cx = 0, cy = 0, R = 0;
+
+/* ──────────────────────────────────────────────────────────────
+   DOM REFS
+────────────────────────────────────────────────────────────────*/
+const canvas = document.getElementById('geo');
+const ctx = canvas.getContext('2d');
+const valX = document.getElementById('valX');
+const valY = document.getElementById('valY');
+const valZ = document.getElementById('valZ');
+
+const sliderX = document.getElementById('sliderX');
+const sliderXVal = document.getElementById('sliderXVal');
+const numX = document.getElementById('numX');
+const btnApply = document.getElementById('btnApply');
+const btnReset = document.getElementById('btnReset');
+const langSelect = document.getElementById('langSelect');
+
+/* ──────────────────────────────────────────────────────────────
+   CANVAS SIZING
+────────────────────────────────────────────────────────────────*/
+function resizeCanvas() {
+  const area = canvas.parentElement;
+  const W = area.clientWidth - 24;
+  const H = area.clientHeight - 24;
+  const dpr = window.devicePixelRatio || 1;
+  const size = Math.max(200, Math.min(W, H, 700));
+
+  canvas.style.width = size + 'px';
+  canvas.style.height = size + 'px';
+  canvas.width = Math.round(size * dpr);
+  canvas.height = Math.round(size * dpr);
+
+  cx = size / 2;
+  cy = size / 2;
+  R = size * 0.36;
+
+  draw();
+}
+
+/* ──────────────────────────────────────────────────────────────
+   MATH HELPERS
+────────────────────────────────────────────────────────────────*/
+function ptOnCircle(angle) {
+  return { x: cx + R * Math.cos(angle), y: cy + R * Math.sin(angle) };
+}
+
+function normAngle(a) {
+  a = a % TWO_PI;
+  if (a < 0) a += TWO_PI;
+  return a;
+}
+
+function calcAngle(p1, vertex, p2) {
+  const a1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+  const a2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+  let diff = Math.abs(normAngle(a2) - normAngle(a1));
+  if (diff > Math.PI) diff = TWO_PI - diff;
+  return diff;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   DRAWING
+────────────────────────────────────────────────────────────────*/
+function draw() {
+  ctx.save();
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const dpr = window.devicePixelRatio || 1;
+  ctx.scale(dpr, dpr);
+
+  const ptQ = ptOnCircle(angleQ);
+  const ptP = ptOnCircle(angleP);
+  const ptA = ptOnCircle(angleA);
+  const ptB = ptOnCircle(angleB);
+  const ptC = { x: cx, y: cy };
+
+  /* ── Circle Area & Outline ── */
+  const grad = ctx.createRadialGradient(cx, cy, R * 0.1, cx, cy, R * 1.1);
+  grad.addColorStop(0, 'rgba(30,58,90,.25)');
+  grad.addColorStop(1, 'rgba(13,27,42,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, TWO_PI);
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, R, 0, TWO_PI);
+  ctx.strokeStyle = '#3a6a9a';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  /* ── Geometric Lines ── */
+  function drawLine(p1, p2) {
+    ctx.beginPath();
+    ctx.moveTo(p1.x, p1.y);
+    ctx.lineTo(p2.x, p2.y);
+    ctx.strokeStyle = '#E8EEF4'; // White/Chalk lines for dark theme
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  drawLine(ptC, ptQ);
+  drawLine(ptC, ptP);
+  drawLine(ptA, ptQ);
+  drawLine(ptA, ptP);
+  drawLine(ptB, ptQ);
+  drawLine(ptB, ptP);
+
+  /* ── Angle Arcs ── */
+  const xRad = calcAngle(ptQ, ptC, ptP);
+  const yRad = calcAngle(ptQ, ptB, ptP);
+  const zRad = calcAngle(ptQ, ptA, ptP);
+
+  drawAngleArc(ptC, ptQ, ptP, R * 0.22, '#00a8e8', 'x', xRad);
+  drawAngleArc(ptB, ptQ, ptP, R * 0.18, '#00a8e8', 'y', yRad);
+  drawAngleArc(ptA, ptQ, ptP, R * 0.18, '#00a8e8', 'z', zRad);
+
+  /* ── Points (Now Round per Request) ── */
+  drawPoint(ptQ, '#E05C5C', 'Q', -14,  14);
+  drawPoint(ptP, '#E05C5C', 'P',  14,  14);
+  drawPoint(ptA, '#E05C5C', 'A',  14, -14);
+  drawPoint(ptB, '#E05C5C', 'B', -14, -14);
+  drawPoint(ptC, '#E05C5C', 'C',   0, -18);
+
+  ctx.restore();
+  updateUI(xRad, yRad, zRad);
+}
+
+function drawAngleArc(vertex, p1, p2, radius, color, symbol, radValue) {
+  let a1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
+  let a2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
+  
+  let start = normAngle(a1);
+  let end = normAngle(a2);
+  
+  if (normAngle(end - start) > Math.PI) {
+    [start, end] = [end, start];
+  }
+
+  // Draw Arc outline
+  ctx.beginPath();
+  ctx.arc(vertex.x, vertex.y, radius, start, end, false);
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Draw Arc fill
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  ctx.beginPath();
+  ctx.moveTo(vertex.x, vertex.y);
+  ctx.arc(vertex.x, vertex.y, radius, start, end, false);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.restore();
+
+  // Draw Label
+  let sweep = normAngle(end - start);
+  let mid = normAngle(start + sweep / 2);
+  const labelOffset = radius + 22;
+  const lx = vertex.x + labelOffset * Math.cos(mid);
+  const ly = vertex.y + labelOffset * Math.sin(mid);
+
+  const text = `${symbol}=${(radValue * RAD).toFixed(1)}°`;
+
+  ctx.font = 'bold 13px Jost, sans-serif';
+  const tw = ctx.measureText(text).width;
+  const ph = 16, pw = tw + 10;
+
+  ctx.save();
+  ctx.globalAlpha = 0.65;
+  ctx.fillStyle = '#0D1B2A';
+  ctx.beginPath();
+  ctx.roundRect(lx - pw/2, ly - ph/2, pw, ph, 4);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = color;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(text, lx, ly);
+}
+
+function drawPoint(pt, color, label, offX, offY) {
+  // Glow
+  ctx.beginPath();
+  ctx.arc(pt.x, pt.y, 9, 0, TWO_PI);
+  ctx.fillStyle = color + '30';
+  ctx.fill();
+
+  // Solid point
+  ctx.beginPath();
+  ctx.arc(pt.x, pt.y, 5.5, 0, TWO_PI);
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#132033';
+  ctx.lineWidth = 2;
+  ctx.fill();
+  ctx.stroke();
+
+  // Text Label
+  ctx.font = 'bold 14px Jost, sans-serif';
+  ctx.fillStyle = '#E8EEF4';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(label, pt.x + offX, pt.y + offY);
+}
+
+/* ──────────────────────────────────────────────────────────────
+   UI CONTROLS
+────────────────────────────────────────────────────────────────*/
+function updateUI(xRad, yRad, zRad) {
+  const xDeg = (xRad * RAD).toFixed(1) + '°';
+  const yDeg = (yRad * RAD).toFixed(1) + '°';
+  const zDeg = (zRad * RAD).toFixed(1) + '°';
+
+  valX.textContent = xDeg;
+  valY.textContent = yDeg;
+  valZ.textContent = zDeg;
+
+  let centerDeg = Math.round(xRad * RAD);
+  sliderX.value = centerDeg;
+  sliderXVal.textContent = centerDeg + '°';
+
+  if (document.activeElement !== numX) {
+    numX.value = centerDeg;
+  }
+}
+
+function applyAngleX(targetDeg) {
+  const targetRad = Math.max(1, Math.min(360, targetDeg)) * DEG;
+  // Keep Q where it is, move P to form the correct angle
+  angleP = normAngle(angleQ - targetRad);
+  draw();
+}
+
+sliderX.addEventListener('input', () => {
+  const v = parseInt(sliderX.value, 10);
+  sliderXVal.textContent = v + '°';
+  numX.value = v;
+  applyAngleX(v);
+});
+
+numX.addEventListener('input', () => {
+  const v = parseInt(numX.value, 10);
+  if (!isNaN(v) && v >= 1 && v <= 360) {
+    sliderX.value = v;
+    sliderXVal.textContent = v + '°';
+    applyAngleX(v);
+  }
+});
+
+btnApply.addEventListener('click', () => {
+  const v = parseInt(numX.value, 10);
+  if (!isNaN(v)) applyAngleX(v);
+});
+
+btnReset.addEventListener('click', () => {
+  angleQ = 135 * DEG;
+  angleP = 45 * DEG;
+  angleB = 225 * DEG;
+  angleA = 300 * DEG;
+  draw();
+});
+
+/* ──────────────────────────────────────────────────────────────
+   DRAG INTERACTION
+────────────────────────────────────────────────────────────────*/
+const DRAG_RADIUS = 24;
+let dragging = null;
+
+function getLogicalCoords(evt) {
+  const rect = canvas.getBoundingClientRect();
+  let clientX, clientY;
+  if (evt.touches && evt.touches.length) {
+    clientX = evt.touches[0].clientX;
+    clientY = evt.touches[0].clientY;
+  } else {
+    clientX = evt.clientX;
+    clientY = evt.clientY;
+  }
+  const scaleX = (canvas.width / (window.devicePixelRatio || 1)) / rect.width;
+  const scaleY = (canvas.height / (window.devicePixelRatio || 1)) / rect.height;
+  return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+}
+
+function nearestPoint(pos) {
+  const pts = { 'Q': ptOnCircle(angleQ), 'P': ptOnCircle(angleP), 'A': ptOnCircle(angleA), 'B': ptOnCircle(angleB) };
+  let minD = Infinity, closest = null;
+  for (let key in pts) {
+    let d = Math.hypot(pos.x - pts[key].x, pos.y - pts[key].y);
+    if (d < minD) { minD = d; closest = key; }
+  }
+  return minD <= DRAG_RADIUS ? closest : null;
+}
+
+function onPointerDown(evt) {
+  const pos = getLogicalCoords(evt);
+  dragging = nearestPoint(pos);
+  if (dragging) evt.preventDefault();
+}
+
+function onPointerMove(evt) {
+  if (!dragging) return;
+  evt.preventDefault();
+  const pos = getLogicalCoords(evt);
+  const newAngle = Math.atan2(pos.y - cy, pos.x - cx);
+
+  if (dragging === 'Q') angleQ = newAngle;
+  else if (dragging === 'P') angleP = newAngle;
+  else if (dragging === 'A') angleA = newAngle;
+  else if (dragging === 'B') angleB = newAngle;
+  draw();
+}
+
+function onPointerUp() { dragging = null; }
+
+canvas.addEventListener('mousedown', onPointerDown);
+window.addEventListener('mousemove', onPointerMove);
+window.addEventListener('mouseup', onPointerUp);
+canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+window.addEventListener('touchmove', onPointerMove, { passive: false });
+window.addEventListener('touchend', onPointerUp);
+
+/* ──────────────────────────────────────────────────────────────
+   LOCALIZATION SETUP
+────────────────────────────────────────────────────────────────*/
+function applyLang(code) {
+  const L = LANGS[code];
+  document.getElementById('hTitle').textContent = L.hTitle;
+  document.getElementById('hSubtitle').textContent = L.hSubtitle;
+  document.getElementById('hLangLabel').textContent = L.hLangLabel;
+  document.getElementById('pAngles').textContent = L.pAngles;
+  document.getElementById('lblCenterAngle').innerHTML = L.lblCenterAngle.replace(' ', '<br>');
+  document.getElementById('lblInscribedAngle1').innerHTML = L.lblInscribedAngle1.replace(' ', '<br>');
+  document.getElementById('lblInscribedAngle2').innerHTML = L.lblInscribedAngle2.replace(' ', '<br>');
+  document.getElementById('pSetAngle').textContent = L.pSetAngle;
+  document.getElementById('numXLbl').textContent = L.numXLbl;
+  document.getElementById('btnApply').textContent = L.btnApply;
+  document.getElementById('btnReset').textContent = L.btnReset;
+  document.getElementById('pTheoremH').textContent = L.pTheoremH;
+  document.getElementById('theoremTitle').textContent = L.theoremTitle;
+  document.getElementById('theoremBody').textContent = L.theoremBody;
+  document.getElementById('pHowH').textContent = L.pHowH;
+  document.getElementById('hint1').textContent = L.hint1;
+  document.getElementById('hint2').textContent = L.hint2;
+  document.getElementById('hint3').textContent = L.hint3;
+  document.getElementById('hint4').textContent = L.hint4;
+  document.getElementById('footerText').textContent = L.footerText;
+  document.title = L.hTitle;
+}
+
+langSelect.addEventListener('change', (e) => applyLang(e.target.value));
+
+const ro = new ResizeObserver(() => resizeCanvas());
+ro.observe(canvas.parentElement);
+window.addEventListener('resize', resizeCanvas);
+
+// Init
+resizeCanvas();
+applyLang('en');
+</script>
+
+</body>
+</html>
