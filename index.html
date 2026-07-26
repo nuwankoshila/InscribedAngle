@@ -228,6 +228,24 @@ canvas#geo:active { cursor: grabbing; }
 }
 .input-row label span { color: var(--chalk-dim); }
 
+/* Checkbox control row */
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .8rem;
+  color: var(--chalk);
+  cursor: pointer;
+  user-select: none;
+  margin-top: 8px;
+}
+.checkbox-row input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 input[type="range"] {
   -webkit-appearance: none;
   width: 100%;
@@ -380,6 +398,11 @@ footer {
             <div class="val" id="valZ">—</div>
           </div>
         </div>
+        <!-- Hide/Unhide Option -->
+        <label class="checkbox-row" style="margin-top:10px;">
+          <input type="checkbox" id="chkShowValues" checked />
+          <span id="lblShowValues">Show Angle Values on Canvas</span>
+        </label>
       </div>
 
       <!-- Set Angle Input -->
@@ -435,158 +458,165 @@ footer {
 ────────────────────────────────────────────────────────────────*/
 const LANGS = {
   en: {
-    hTitle:       'Inscribed Angle Theorem',
-    hSubtitle:    'Interactive Proof Explorer',
-    hLangLabel:   'Language',
-    pAngles:      'Angles',
-    lblCenterAngle: 'Center Angle',
+    hTitle:          'Inscribed Angle Theorem',
+    hSubtitle:       'Interactive Proof Explorer',
+    hLangLabel:      'Language',
+    pAngles:         'Angles',
+    lblCenterAngle:  'Center Angle',
     lblInscribedAngle1: 'Inscribed Angle',
     lblInscribedAngle2: 'Inscribed Angle',
-    pSetAngle:    'Set Angle',
-    numXLbl:      'Target x (°)',
-    btnApply:     'Apply',
-    btnReset:     'Reset',
-    pTheoremH:    'Theorem',
-    theoremTitle: 'Inscribed Angle Theorem',
-    theoremBody:  'The angle subtended by an arc at the center is double the angle subtended by it at any remaining part of the circle. Angles subtended by the same arc are equal.',
-    pHowH:        'How to use',
-    hint1:        'Drag A, B, P, or Q along the circle',
-    hint2:        'Type a target angle for x and press Apply',
-    hint3:        'Use the slider for quick adjustment',
-    hint4:        'Notice how x is always double y and z',
-    footerText:   'Inscribed Angle Theorem · Interactive Geometry Explorer'
+    lblShowValues:   'Show Angle Values on Canvas',
+    pSetAngle:       'Set Angle',
+    numXLbl:         'Target x (°)',
+    btnApply:        'Apply',
+    btnReset:        'Reset',
+    pTheoremH:       'Theorem',
+    theoremTitle:    'Inscribed Angle Theorem',
+    theoremBody:     'The angle subtended by an arc at the center is double the angle subtended by it at any remaining part of the circle. Angles subtended by the same arc are equal.',
+    pHowH:           'How to use',
+    hint1:           'Drag A, B, P, or Q along the circle',
+    hint2:           'Type a target angle for x and press Apply',
+    hint3:           'Use the slider for quick adjustment',
+    hint4:           'Notice how x is always double y and z',
+    footerText:      'Inscribed Angle Theorem · Interactive Geometry Explorer'
   },
   pl: {
-    hTitle:       'Twierdzenie o kącie środkowym i wpisanym',
-    hSubtitle:    'Interaktywny eksplorator dowodu',
-    hLangLabel:   'Język',
-    pAngles:      'Kąty',
-    lblCenterAngle: 'Kąt środkowy',
+    hTitle:          'Twierdzenie o kącie środkowym i wpisanym',
+    hSubtitle:       'Interaktywny eksplorator dowodu',
+    hLangLabel:      'Język',
+    pAngles:         'Kąty',
+    lblCenterAngle:  'Kąt środkowy',
     lblInscribedAngle1: 'Kąt wpisany',
     lblInscribedAngle2: 'Kąt wpisany',
-    pSetAngle:    'Ustaw kąt',
-    numXLbl:      'Docelowy x (°)',
-    btnApply:     'Zastosuj',
-    btnReset:     'Resetuj',
-    pTheoremH:    'Twierdzenie',
-    theoremTitle: 'Twierdzenie o kącie wpisanym',
-    theoremBody:  'Miara kąta środkowego jest dwa razy większa od miary kąta wpisanego opartego na tym samym łuku.',
-    pHowH:        'Jak używać',
-    hint1:        'Przeciągaj A, B, P lub Q wzdłuż okręgu',
-    hint2:        'Wpisz kąt docelowy dla x i naciśnij Zastosuj',
-    hint3:        'Użyj suwaka do szybkiej regulacji',
-    hint4:        'Zauważ, że x jest zawsze podwojeniem y i z',
-    footerText:   'Twierdzenie o kącie wpisanym · Interaktywny eksplorator geometrii'
+    lblShowValues:   'Pokaż wartości kątów na rysunku',
+    pSetAngle:       'Ustaw kąt',
+    numXLbl:         'Docelowy x (°)',
+    btnApply:        'Zastosuj',
+    btnReset:        'Resetuj',
+    pTheoremH:       'Twierdzenie',
+    theoremTitle:    'Twierdzenie o kącie wpisanym',
+    theoremBody:     'Miara kąta środkowego jest dwa razy większa od miary kąta wpisanego opartego na tym samym łuku.',
+    pHowH:           'Jak używać',
+    hint1:           'Przeciągaj A, B, P lub Q wzdłuż okręgu',
+    hint2:           'Wpisz kąt docelowy dla x i naciśnij Zastosuj',
+    hint3:           'Użyj suwaka do szybkiej regulacji',
+    hint4:           'Zauważ, że x jest zawsze podwojeniem y i z',
+    footerText:      'Twierdzenie o kącie wpisanym · Interaktywny eksplorator geometrii'
   },
   de: {
-    hTitle:       'Kreiswinkelsatz',
-    hSubtitle:    'Interaktiver Beweis-Explorer',
-    hLangLabel:   'Sprache',
-    pAngles:      'Winkel',
-    lblCenterAngle: 'Zentriwinkel',
+    hTitle:          'Kreiswinkelsatz',
+    hSubtitle:       'Interaktiver Beweis-Explorer',
+    hLangLabel:      'Sprache',
+    pAngles:         'Winkel',
+    lblCenterAngle:  'Zentriwinkel',
     lblInscribedAngle1: 'Umfangswinkel',
     lblInscribedAngle2: 'Umfangswinkel',
-    pSetAngle:    'Winkel einstellen',
-    numXLbl:      'Ziel x (°)',
-    btnApply:     'Anwenden',
-    btnReset:     'Zurücksetzen',
-    pTheoremH:    'Satz',
-    theoremTitle: 'Kreiswinkelsatz (Zentriwinkelsatz)',
-    theoremBody:  'Der Zentriwinkel (Mittelpunktswinkel) eines Kreisbogens ist doppelt so groß wie der Umfangswinkel über demselben Bogen.',
-    pHowH:        'Verwendung',
-    hint1:        'Ziehe A, B, P oder Q entlang des Kreises',
-    hint2:        'Gib einen Zielwinkel für x ein und drücke Anwenden',
-    hint3:        'Schieberegler für schnelle Anpassung',
-    hint4:        'Beachte, wie x immer doppelt so groß wie y und z ist',
-    footerText:   'Kreiswinkelsatz · Interaktiver Geometrie-Explorer'
+    lblShowValues:   'Winkelwerte im Canvas anzeigen',
+    pSetAngle:       'Winkel einstellen',
+    numXLbl:         'Ziel x (°)',
+    btnApply:        'Anwenden',
+    btnReset:        'Zurücksetzen',
+    pTheoremH:       'Satz',
+    theoremTitle:    'Kreiswinkelsatz (Zentriwinkelsatz)',
+    theoremBody:     'Der Zentriwinkel (Mittelpunktswinkel) eines Kreisbogens ist doppelt so groß wie der Umfangswinkel über demselben Bogen.',
+    pHowH:           'Verwendung',
+    hint1:           'Ziehe A, B, P oder Q entlang des Kreises',
+    hint2:           'Gib einen Zielwinkel für x ein und drücke Anwenden',
+    hint3:           'Schieberegler für schnelle Anpassung',
+    hint4:           'Beachte, wie x immer doppelt so groß wie y und z ist',
+    footerText:      'Kreiswinkelsatz · Interaktiver Geometrie-Explorer'
   },
   cs: {
-    hTitle:       'Věta o středovém a obvodovém úhlu',
-    hSubtitle:    'Interaktivní průzkum důkazu',
-    hLangLabel:   'Jazyk',
-    pAngles:      'Úhly',
-    lblCenterAngle: 'Středový úhel',
+    hTitle:          'Věta o středovém a obvodovém úhlu',
+    hSubtitle:       'Interaktivní průzkum důkazu',
+    hLangLabel:      'Jazyk',
+    pAngles:         'Úhly',
+    lblCenterAngle:  'Středový úhel',
     lblInscribedAngle1: 'Obvodový úhel',
     lblInscribedAngle2: 'Obvodový úhel',
-    pSetAngle:    'Nastavit úhel',
-    numXLbl:      'Cílový x (°)',
-    btnApply:     'Použít',
-    btnReset:     'Resetovat',
-    pTheoremH:    'Věta',
-    theoremTitle: 'Věta o středovém a obvodovém úhlu',
-    theoremBody:  'Velikost středového úhlu je dvojnásobkem velikosti obvodového úhlu příslušného k témuž oblouku.',
-    pHowH:        'Jak používat',
-    hint1:        'Přetáhněte A, B, P nebo Q podél kružnice',
-    hint2:        'Zadejte cílový úhel pro x a stiskněte Použít',
-    hint3:        'Pro rychlé nastavení použijte posuvník',
-    hint4:        'Všimněte si, že x je vždy dvojnásobkem y a z',
-    footerText:   'Věta o úhlech · Interaktivní průzkum geometrie'
+    lblShowValues:   'Zobrazit hodnoty úhlů na plátně',
+    pSetAngle:       'Nastavit úhel',
+    numXLbl:         'Cílový x (°)',
+    btnApply:        'Použít',
+    btnReset:        'Resetovat',
+    pTheoremH:       'Věta',
+    theoremTitle:    'Věta o středovém a obvodovém úhlu',
+    theoremBody:     'Velikost středového úhlu je dvojnásobkem velikosti obvodového úhlu příslušného k témuž oblouku.',
+    pHowH:           'Jak používat',
+    hint1:           'Přetáhněte A, B, P nebo Q podél kružnice',
+    hint2:           'Zadejte cílový úhel pro x a stiskněte Použít',
+    hint3:           'Pro rychlé nastavení použijte posuvník',
+    hint4:           'Všimněte si, že x je vždy dvojnásobkem y a z',
+    footerText:      'Věta o úhlech · Interaktivní průzkum geometrie'
   },
   si: {
-    hTitle:       'කේන්ද්‍රික කෝණ ප්‍රමේයය',
-    hSubtitle:    'අන්තර්ක්‍රියාකාරී සාක්ෂ්‍ය ගවේෂකය',
-    hLangLabel:   'භාෂාව',
-    pAngles:      'කෝණ',
-    lblCenterAngle: 'කේන්ද්‍රික කෝණය',
+    hTitle:          'කේන්ද්‍රික කෝණ ප්‍රමේයය',
+    hSubtitle:       'අන්තර්ක්‍රියාකාරී සාක්ෂ්‍ය ගවේෂකය',
+    hLangLabel:      'භාෂාව',
+    pAngles:         'කෝණ',
+    lblCenterAngle:  'කේන්ද්‍රික කෝණය',
     lblInscribedAngle1: 'පරිධි කෝණය',
     lblInscribedAngle2: 'පරිධි කෝණය',
-    pSetAngle:    'කෝණය සකසන්න',
-    numXLbl:      'ඉලක්ක x (°)',
-    btnApply:     'යොදන්න',
-    btnReset:     'යළි පිහිටුවන්න',
-    pTheoremH:    'ප්‍රමේයය',
-    theoremTitle: 'කේන්ද්‍රික කෝණ ප්‍රමේයය',
-    theoremBody:  'වෘත්ත චාපයක් මගින් කේන්ද්‍රය මත ආපාතනය කරන කෝණය, එම චාපය මගින් පරිධියේ ඉතිරි කොටස මත ආපාතනය කරන කෝණය මෙන් දෙගුණයකි.',
-    pHowH:        'භාවිත කරන්නේ කෙසේද',
-    hint1:        'A, B, P හෝ Q වෘත්තය දිගේ ඈදගෙන යන්න',
-    hint2:        'x සඳහා කෝණ අගයක් ටයිප් කර යොදන්න ඔබන්න',
-    hint3:        'ඉක්මන් සීරුමාරුව සඳහා slider එක භාවිත කරන්න',
-    hint4:        'x අගය සැමවිටම y සහ z මෙන් දෙගුණයක් වන අයුරු බලන්න',
-    footerText:   'කේන්ද්‍රික කෝණ ප්‍රමේයය · අන්තර්ක්‍රියාකාරී ජ්‍යාමිතිය'
+    lblShowValues:   'කෝණ අගයන් පෙන්වන්න',
+    pSetAngle:       'කෝණය සකසන්න',
+    numXLbl:         'ඉලක්ක x (°)',
+    btnApply:        'යොදන්න',
+    btnReset:        'යළි පිහිටුවන්න',
+    pTheoremH:       'ප්‍රමේයය',
+    theoremTitle:    'කේන්ද්‍රික කෝණ ප්‍රමේයය',
+    theoremBody:     'වෘත්ත චාපයක් මගින් කේන්ද්‍රය මත ආපාතනය කරන කෝණය, එම චාපය මගින් පරිධියේ ඉතිරි කොටස මත ආපාතනය කරන කෝණය මෙන් දෙගුණයකි.',
+    pHowH:           'භාවිත කරන්නේ කෙසේද',
+    hint1:           'A, B, P හෝ Q වෘත්තය දිගේ ඈදගෙන යන්න',
+    hint2:           'x සඳහා කෝණ අගයක් ටයිප් කර යොදන්න ඔබන්න',
+    hint3:           'ඉක්මන් සීරුමාරුව සඳහා slider එක භාවිත කරන්න',
+    hint4:           'x අගය සැමවිටම y සහ z මෙන් දෙගුණයක් වන අයුරු බලන්න',
+    footerText:      'කේන්ද්‍රික කෝණ ප්‍රමේයය · අන්තර්ක්‍රියාකාරී ජ්‍යාමිතිය'
   },
   hi: {
-    hTitle:       'केन्द्रीय कोण प्रमेय',
-    hSubtitle:    'इंटरएक्टिव प्रमाण अन्वेषक',
-    hLangLabel:   'भाषा',
-    pAngles:      'कोण',
-    lblCenterAngle: 'केन्द्रीय कोण',
+    hTitle:          'केन्द्रीय कोण प्रमेय',
+    hSubtitle:       'इंटरएक्टिव प्रमाण अन्वेषक',
+    hLangLabel:      'भाषा',
+    pAngles:         'कोण',
+    lblCenterAngle:  'केन्द्रीय कोण',
     lblInscribedAngle1: 'अंकित कोण',
     lblInscribedAngle2: 'अंकित कोण',
-    pSetAngle:    'कोण सेट करें',
-    numXLbl:      'लक्ष्य x (°)',
-    btnApply:     'लागू करें',
-    btnReset:     'रीसेट',
-    pTheoremH:    'प्रमेय',
-    theoremTitle: 'केन्द्रीय कोण प्रमेय',
-    theoremBody:  'किसी चाप द्वारा वृत्त के केंद्र पर बना कोण, उसी चाप द्वारा वृत्त की शेष परिधि के किसी बिंदु पर बने कोण का दोगुना होता है।',
-    pHowH:        'उपयोग कैसे करें',
-    hint1:        'A, B, P या Q को वृत्त के साथ खींचें',
-    hint2:        'x के लिए लक्ष्य कोण टाइप करें और लागू करें दबाएं',
-    hint3:        'त्वरित समायोजन के लिए स्लाइडर का उपयोग करें',
-    hint4:        'देखें कि x हमेशा y और z का दोगुना होता है',
-    footerText:   'केन्द्रीय कोण प्रमेय · इंटरएक्टिव ज्यामिति अन्वेषक'
+    lblShowValues:   'कैनवास पर कोण मान दिखाएं',
+    pSetAngle:       'कोण सेट करें',
+    numXLbl:         'लक्ष्य x (°)',
+    btnApply:        'लागू करें',
+    btnReset:        'रीसेट',
+    pTheoremH:       'प्रमेय',
+    theoremTitle:    'केन्द्रीय कोण प्रमेय',
+    theoremBody:     'किसी चाप द्वारा वृत्त के केंद्र पर बना कोण, उसी चाप द्वारा वृत्त की शेष परिधि के किसी बिंदु पर बने कोण का दोगुना होता है।',
+    pHowH:           'उपयोग कैसे करें',
+    hint1:           'A, B, P या Q को वृत्त के साथ खींचें',
+    hint2:           'x के लिए लक्ष्य कोण टाइप करें और लागू करें दबाएं',
+    hint3:           'त्वरित समायोजन के लिए स्लाइडर का उपयोग करें',
+    hint4:           'देखें कि x हमेशा y और z का दोगुना होता है',
+    footerText:      'केन्द्रीय कोण प्रमेय · इंटरएक्टिव ज्यामिति अन्वेषक'
   },
   ja: {
-    hTitle:       '円周角の定理',
-    hSubtitle:    'インタラクティブ証明エクスプローラー',
-    hLangLabel:   '言語',
-    pAngles:      '角度',
-    lblCenterAngle: '中心角',
+    hTitle:          '円周角の定理',
+    hSubtitle:       'インタラクティブ証明エクスプローラー',
+    hLangLabel:      '言語',
+    pAngles:         '角度',
+    lblCenterAngle:  '中心角',
     lblInscribedAngle1: '円周角',
     lblInscribedAngle2: '円周角',
-    pSetAngle:    '角度を設定',
-    numXLbl:      '目標 x (°)',
-    btnApply:     '適用',
-    btnReset:     'リセット',
-    pTheoremH:    '定理',
-    theoremTitle: '円周角の定理',
-    theoremBody:  '1つの弧に対する中心角の大きさは、その弧に対する円周角の大きさの2倍である。同じ弧に対する円周角は等しい。',
-    pHowH:        '使い方',
-    hint1:        'A、B、P、またはQを円上でドラッグしてください',
-    hint2:        'xの目標角度を入力して「適用」を押してください',
-    hint3:        'スライダーで素早く調整できます',
-    hint4:        'xが常にyとzの2倍であることを観察してください',
-    footerText:   '円周角の定理 · インタラクティブ幾何学エクスプローラー'
+    lblShowValues:   'キャンバスに角度の値を表示',
+    pSetAngle:       '角度を設定',
+    numXLbl:         '目標 x (°)',
+    btnApply:        '適用',
+    btnReset:        'リセット',
+    pTheoremH:       '定理',
+    theoremTitle:    '円周角の定理',
+    theoremBody:     '1つの弧に対する中心角の大きさは、その弧に対する円周角の大きさ의 2倍である。同じ弧に対する円周角は等しい。',
+    pHowH:           '使い方',
+    hint1:           'A、B、P、またはQを円上でドラッグしてください',
+    hint2:           'xの目標角度を入力して「適用」を押してください',
+    hint3:           'スライダーで素早く調整できます',
+    hint4:           'xが常にyとzの2倍であることを観察してください',
+    footerText:      '円周角の定理 · インタラクティブ幾何学エクスプローラー'
   }
 };
 
@@ -620,6 +650,7 @@ const numX = document.getElementById('numX');
 const btnApply = document.getElementById('btnApply');
 const btnReset = document.getElementById('btnReset');
 const langSelect = document.getElementById('langSelect');
+const chkShowValues = document.getElementById('chkShowValues');
 
 /* ──────────────────────────────────────────────────────────────
    CANVAS SIZING
@@ -700,7 +731,7 @@ function draw() {
     ctx.beginPath();
     ctx.moveTo(p1.x, p1.y);
     ctx.lineTo(p2.x, p2.y);
-    ctx.strokeStyle = '#E8EEF4'; // White/Chalk lines for dark theme
+    ctx.strokeStyle = '#E8EEF4';
     ctx.lineWidth = 1.5;
     ctx.stroke();
   }
@@ -717,11 +748,13 @@ function draw() {
   const yRad = calcAngle(ptQ, ptB, ptP);
   const zRad = calcAngle(ptQ, ptA, ptP);
 
-  drawAngleArc(ptC, ptQ, ptP, R * 0.22, '#00a8e8', 'x', xRad);
-  drawAngleArc(ptB, ptQ, ptP, R * 0.18, '#00a8e8', 'y', yRad);
-  drawAngleArc(ptA, ptQ, ptP, R * 0.18, '#00a8e8', 'z', zRad);
+  const showValues = chkShowValues.checked;
 
-  /* ── Points (Now Round per Request) ── */
+  drawAngleArc(ptC, ptQ, ptP, R * 0.22, '#00a8e8', 'x', xRad, showValues);
+  drawAngleArc(ptB, ptQ, ptP, R * 0.18, '#00a8e8', 'y', yRad, showValues);
+  drawAngleArc(ptA, ptQ, ptP, R * 0.18, '#00a8e8', 'z', zRad, showValues);
+
+  /* ── Points ── */
   drawPoint(ptQ, '#E05C5C', 'Q', -14,  14);
   drawPoint(ptP, '#E05C5C', 'P',  14,  14);
   drawPoint(ptA, '#E05C5C', 'A',  14, -14);
@@ -732,7 +765,7 @@ function draw() {
   updateUI(xRad, yRad, zRad);
 }
 
-function drawAngleArc(vertex, p1, p2, radius, color, symbol, radValue) {
+function drawAngleArc(vertex, p1, p2, radius, color, symbol, radValue, showValues) {
   let a1 = Math.atan2(p1.y - vertex.y, p1.x - vertex.x);
   let a2 = Math.atan2(p2.y - vertex.y, p2.x - vertex.x);
   
@@ -761,31 +794,33 @@ function drawAngleArc(vertex, p1, p2, radius, color, symbol, radValue) {
   ctx.fill();
   ctx.restore();
 
-  // Draw Label
-  let sweep = normAngle(end - start);
-  let mid = normAngle(start + sweep / 2);
-  const labelOffset = radius + 22;
-  const lx = vertex.x + labelOffset * Math.cos(mid);
-  const ly = vertex.y + labelOffset * Math.sin(mid);
+  // Draw Label only if enabled
+  if (showValues) {
+    let sweep = normAngle(end - start);
+    let mid = normAngle(start + sweep / 2);
+    const labelOffset = radius + 22;
+    const lx = vertex.x + labelOffset * Math.cos(mid);
+    const ly = vertex.y + labelOffset * Math.sin(mid);
 
-  const text = `${symbol}=${(radValue * RAD).toFixed(1)}°`;
+    const text = `${symbol}=${(radValue * RAD).toFixed(1)}°`;
 
-  ctx.font = 'bold 13px Jost, sans-serif';
-  const tw = ctx.measureText(text).width;
-  const ph = 16, pw = tw + 10;
+    ctx.font = 'bold 13px Jost, sans-serif';
+    const tw = ctx.measureText(text).width;
+    const ph = 16, pw = tw + 10;
 
-  ctx.save();
-  ctx.globalAlpha = 0.65;
-  ctx.fillStyle = '#0D1B2A';
-  ctx.beginPath();
-  ctx.roundRect(lx - pw/2, ly - ph/2, pw, ph, 4);
-  ctx.fill();
-  ctx.restore();
+    ctx.save();
+    ctx.globalAlpha = 0.65;
+    ctx.fillStyle = '#0D1B2A';
+    ctx.beginPath();
+    ctx.roundRect(lx - pw/2, ly - ph/2, pw, ph, 4);
+    ctx.fill();
+    ctx.restore();
 
-  ctx.fillStyle = color;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, lx, ly);
+    ctx.fillStyle = color;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, lx, ly);
+  }
 }
 
 function drawPoint(pt, color, label, offX, offY) {
@@ -835,7 +870,6 @@ function updateUI(xRad, yRad, zRad) {
 
 function applyAngleX(targetDeg) {
   const targetRad = Math.max(1, Math.min(360, targetDeg)) * DEG;
-  // Keep Q where it is, move P to form the correct angle
   angleP = normAngle(angleQ - targetRad);
   draw();
 }
@@ -866,6 +900,10 @@ btnReset.addEventListener('click', () => {
   angleP = 45 * DEG;
   angleB = 225 * DEG;
   angleA = 300 * DEG;
+  draw();
+});
+
+chkShowValues.addEventListener('change', () => {
   draw();
 });
 
@@ -940,6 +978,7 @@ function applyLang(code) {
   document.getElementById('lblCenterAngle').innerHTML = L.lblCenterAngle.replace(' ', '<br>');
   document.getElementById('lblInscribedAngle1').innerHTML = L.lblInscribedAngle1.replace(' ', '<br>');
   document.getElementById('lblInscribedAngle2').innerHTML = L.lblInscribedAngle2.replace(' ', '<br>');
+  document.getElementById('lblShowValues').textContent = L.lblShowValues;
   document.getElementById('pSetAngle').textContent = L.pSetAngle;
   document.getElementById('numXLbl').textContent = L.numXLbl;
   document.getElementById('btnApply').textContent = L.btnApply;
